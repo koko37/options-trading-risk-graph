@@ -2,7 +2,7 @@
 
 ## Objective
 
-Design and implement a vue front-end for options strategy risk and reward analysis using Vue.
+Design and implement a front-end for options strategy risk and reward analysis using Vue.
 
 ## Brief
 
