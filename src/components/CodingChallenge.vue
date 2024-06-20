@@ -1,34 +1,34 @@
 <template>
-  <div class="container">
-    <h1>Risk / Reward Graph</h1>
-    <canvas :id="canvasId"></canvas>
+  <div class="pl-graph-container">
+    <h2>Risk / Reward Graph</h2>
+    <div v-if="maxProfit !== null && maxLoss !== null && breakEvenPoints.length" class="pl-graph-summary">
+      <span>Max Profit: <strong>{{ maxProfit.toFixed(2) }}</strong></span>
+      <span>Max Loss: <strong>{{ maxLoss.toFixed(2) }}</strong></span>
+      <span>Break Even Points: <strong>{{ breakEvenPoints.join(', ') }}</strong></span>
+    </div>
 
-    <div class="select">
+    <canvas :id="canvasId" class="pl-graph-canvas" />
+
+    <div class="pl-graph-select">
       <div v-for="(option, index) in optionSelected" :key="index">
-        <input :id="'option-' + index" type="checkbox" v-model="optionSelected[index]" />
-        <label :for="'option-' + index">
+        <input :id="canvasId + '-option-' + index" type="checkbox" v-model="optionSelected[index]" />
+        <label :for="canvasId + '-option-' + index">
           {{ optionLabel(optionsData[index]) }}
         </label>
       </div>
-    </div>
-
-    <div v-if="maxProfit !== null && maxLoss !== null && breakEvenPoints.length">
-      <p>Max Profit: {{ maxProfit }}</p>
-      <p>Max Loss: {{ maxLoss }}</p>
-      <p>Break Even Points: {{ breakEvenPoints.join(', ') }}</p>
     </div>
   </div>
 </template>
 
 <script>
 import Chart from 'chart.js/auto';
-/*
+
+const ZERO_THRESHOLD = 0.001
 const findXAxisIntersection = (x1, y1, x2, y2) => {
   const m = (y2 - y1) / (x2 - x1);
   const c = y1 - m * x1;
   return -c / m;
 }
-*/
 
 export default {
   name: 'CodingChallenge',
@@ -65,6 +65,7 @@ export default {
       const prices = [minPrice, maxPrice];
       const profits = [];
 
+      // extract special price points
       for (const option of this.selectedOptions) {
         prices.push(option.strike_price)
         if (option.type === 'Call') {
@@ -75,6 +76,7 @@ export default {
       }
       prices.sort((a, b) => a - b);
 
+      // calculate sum of p/l
       for (const price of prices) {
         profits.push(this.selectedOptions.reduce((acc, { strike_price, type, long_short, bid, ask }) => {
           const cost = (bid + ask) / 2;
@@ -95,11 +97,27 @@ export default {
         }, 0));
       }
 
+      // calculate mid-term break even points
+      let i = 0;
+      while (i < prices.length - 1) {
+        if (
+          (profits[i] < -ZERO_THRESHOLD && profits[i + 1] > ZERO_THRESHOLD) ||
+          (profits[i] > ZERO_THRESHOLD && profits[i + 1] < -ZERO_THRESHOLD)
+        ) {
+          const x = findXAxisIntersection(prices[i], profits[i], prices[i + 1], profits[i + 1])
+          prices.splice(i + 1, 0, x.toFixed(2))
+          profits.splice(i + 1, 0, 0)
+          i += 2;
+          continue
+        }
+        i++;
+      }
+
       this.prices = prices;
       this.profits = profits;
       this.maxProfit = Math.max(...profits);
       this.maxLoss = Math.min(...profits);
-      this.breakEvenPoints = prices.filter((price, index) => profits[index] === 0);
+      this.breakEvenPoints = prices.filter((price, index) => Math.abs(profits[index]) < ZERO_THRESHOLD);
     },
     drawChart() {
       if (this.chart) {
@@ -132,7 +150,7 @@ export default {
                 text: 'Loss/Profit'
               }
             }
-          }
+          },
         }
       });
     }
@@ -155,11 +173,30 @@ canvas {
   max-height: 480px;
 }
 
-.select {
+.pl-graph-container {
+  margin: 4px;
+  padding: 4px;
+}
+
+.pl-graph-select {
   margin-top: 24px;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #EEE;
+}
+
+.pl-graph-summary {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #EEE;
 }
 </style>
