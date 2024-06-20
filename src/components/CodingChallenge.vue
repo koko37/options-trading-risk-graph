@@ -1,10 +1,10 @@
 <template>
   <div class="pl-graph-container">
     <h1>Options Profit Calculator</h1>
-    <div v-if="maxProfit !== null && maxLoss !== null && breakEvenPoints.length" class="pl-graph-summary">
-      <span>Max Profit: <strong>{{ maxProfit.toFixed(2) }}</strong></span>
-      <span>Max Loss: <strong>{{ maxLoss.toFixed(2) }}</strong></span>
-      <span>Break Even Points: <strong>{{ breakEvenPoints.join(', ') }}</strong></span>
+    <div v-if="!!maxProfit && !!maxLoss && breakEvenPoints.length>0" class="pl-graph-summary">
+      <p>Max Profit: <strong>{{ maxProfit.toFixed(2) }}</strong></p>
+      <p>Max Loss: <strong>{{ maxLoss.toFixed(2) }}</strong></p>
+      <p>Break Even Points: <strong>{{ breakEvenPoints.join(', ') }}</strong></p>
     </div>
 
     <canvas :id="canvasId" class="pl-graph-canvas" />
@@ -131,12 +131,17 @@ export default {
           datasets: [{
             label: 'Loss/Profit',
             data: this.profits,
-            borderColor: 'rgba(175, 192, 192, 1)',
-            borderWidth: 2,
+            borderColor: '#0be881',
+            borderWidth: 3,
             fill: false
           }]
         },
         options: {
+          plugins: {
+            legend: {
+              display: false,
+            }
+          },
           scales: {
             x: {
               title: {
@@ -193,8 +198,8 @@ canvas {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 24px;
+  margin-bottom: 24px;
   padding: 8px;
   border-radius: 4px;
   background-color: #EEE;
