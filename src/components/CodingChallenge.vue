@@ -1,6 +1,6 @@
 <template>
   <div class="pl-graph-container">
-    <h2>Risk / Reward Graph</h2>
+    <h1>Options Profit Calculator</h1>
     <div v-if="maxProfit !== null && maxLoss !== null && breakEvenPoints.length" class="pl-graph-summary">
       <span>Max Profit: <strong>{{ maxProfit.toFixed(2) }}</strong></span>
       <span>Max Loss: <strong>{{ maxLoss.toFixed(2) }}</strong></span>
